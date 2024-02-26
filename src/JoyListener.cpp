@@ -8,6 +8,9 @@ JoyListener::JoyListener(std::string name,std::string _sub_topic_name): Node(nam
 void JoyListener::add_publisher(std::shared_ptr<ParseAndPub> _publisher){
     this->publishers.push_back(_publisher);
 }
+void JoyListener::add_client(std::shared_ptr<ParseAndAskSrv> _client){
+    this->clients.push_back(_client);
+}
 
 void JoyListener::sub_callback(const std_msgs::msg::UInt8MultiArray::SharedPtr msg){
     RCLCPP_INFO(this->get_logger(),"msg receive:");
@@ -16,8 +19,12 @@ void JoyListener::sub_callback(const std_msgs::msg::UInt8MultiArray::SharedPtr m
         std::cout<<(int)i<<"\t";
     }
     std::cout<<std::endl;
-    for(auto &i : publishers)
+    for(auto &pub : publishers)
     {
-        i->msg_publish(msg);
+        pub->msg_publish(msg);
+    }
+    for(auto &clt : clients)
+    {
+        clt->send_request(msg);
     }
 }

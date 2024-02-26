@@ -12,6 +12,7 @@ find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -23,7 +24,7 @@ aux_source_directory(./src SRC_LIST)
 #executable
 #add_executable(Joy_node src/Joy_node.cpp src/JoyListener.cpp src/TwistPub.cpp)
 add_executable(Joy_node ${SRC_LIST})
-ament_target_dependencies(Joy_node rclcpp std_msgs geometry_msgs)
+ament_target_dependencies(Joy_node rclcpp std_msgs geometry_msgs std_srvs)
 #install
 install(TARGETS
 Joy_node
