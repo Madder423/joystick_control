@@ -14,7 +14,7 @@ class JoyPublisher(Node):
         self.get_logger().info("Node %s start" % name)
         #self.header_publisher_ = self.create_publisher(Header,"JoyStick_Header", 10) 
         self.array_publisher_ = self.create_publisher(UInt8MultiArray,"JoyStick_array", 10) 
-        self.timer = self.create_timer(0.1, self.timer_callback)
+        self.timer = self.create_timer(0.05, self.timer_callback)
     
     def timer_callback(self):
         """

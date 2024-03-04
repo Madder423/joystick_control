@@ -13,11 +13,11 @@ void JoyListener::add_client(std::shared_ptr<ParseAndAskSrv> _client){
 }
 
 void JoyListener::sub_callback(const std_msgs::msg::UInt8MultiArray::SharedPtr msg){
-    RCLCPP_INFO(this->get_logger(),"msg receive:");
-    for(auto &i : msg->data)
-    {
-        std::cout<<(int)i<<"\t";
-    }
+    RCLCPP_INFO(this->get_logger(),"msg receive");
+    // for(auto &i : msg->data)
+    // {
+    //     std::cout<<(int)i<<"\t";
+    // }
     std::cout<<std::endl;
     for(auto &pub : publishers)
     {

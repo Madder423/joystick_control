@@ -19,7 +19,7 @@ find_package(std_srvs REQUIRED)
 
 #cpp部分
 #include
-include_directories(include/joystick_control)
+include_directories(include/joystick_control include/utils)
 aux_source_directory(./src SRC_LIST)
 #executable
 #add_executable(Joy_node src/Joy_node.cpp src/JoyListener.cpp src/TwistPub.cpp)

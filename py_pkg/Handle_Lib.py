@@ -24,11 +24,11 @@ class HandleDataProcessor:
             exit()
 
     def get_data_lists(self):
-        try:
-            uart_data = self.my_uart.CRC8_Check(self.my_uart.recv(9))
-        except:
-            print('Cannot receive UART data')
-            return False
+        # try:
+        #     uart_data = self.my_uart.CRC8_Check(self.my_uart.recv(9))
+        # except:
+        #     print('Cannot receive UART data')
+        #     return False
 
         # TCP's quirk: client needs to send first to get feedback
         try:
@@ -45,11 +45,11 @@ class HandleDataProcessor:
             return False
 
         # 通常情况下，TCP的消息更新的比UART的快，在连续改变msg的时候，TCP的的消息更及时
-        if uart_data != socket_data:
-            for i in range(5):
-                #TODO: 在目标值快速改变的时候会出毛病
-                if uart_data==False or abs(socket_data[i] - uart_data[i]) > 3:
-                    return False
+        # if uart_data != socket_data:
+        #     for i in range(5):
+        #         #TODO: 在目标值快速改变的时候会出毛病
+        #         if uart_data==False or abs(socket_data[i] - uart_data[i]) > 3:
+        #             return False
         return socket_data
 
 # Direct execution of the script
