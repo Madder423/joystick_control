@@ -1,7 +1,7 @@
 #pragma once
 #include "rclcpp/rclcpp.hpp"
 //#include "std_msgs/msg/header.hpp"
-#include "std_msgs/msg/u_int8_multi_array.hpp"
+#include "bupt_interfaces/msg/joy.hpp"
 
 class ParseAndAskSrv{
 protected:
@@ -10,7 +10,7 @@ protected:
 public:
     ParseAndAskSrv(std::string _srv_name,std::shared_ptr<rclcpp::Node> _node): 
     srv_name(_srv_name),node(_node){};
-    virtual void send_request(const std_msgs::msg::UInt8MultiArray::SharedPtr array) = 0;
+    virtual void send_request(const bupt_interfaces::msg::Joy::SharedPtr array) = 0;
     bool wait_for_server(rclcpp::ClientBase::SharedPtr client){
          // 1.等待服务端上线
     while (!client->wait_for_service(std::chrono::seconds(1))) {

@@ -5,7 +5,7 @@ from py_pkg.joy_publisher import JoyPublisher
 
 def main(args=None):
     rclpy.init(args=args) # 初始化rclpy
-    node = JoyPublisher("joy_publisher",uart_port='/dev/ttyUSB0')  # 新建一个节点
+    node = JoyPublisher("joy_publisher")  # 新建一个节点
     rclpy.spin(node) # 保持节点运行，检测是否收到退出指令（Ctrl+C）
     rclpy.shutdown() # 关闭rclpy
 

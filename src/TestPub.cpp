@@ -1,9 +1,9 @@
 #include "TestPub.h"
 
-void TestPub::msg_publish(const std_msgs::msg::UInt8MultiArray::SharedPtr array)
+void TestPub::msg_publish(const bupt_interfaces::msg::Joy::SharedPtr array)
 {
     //创建消息
-    std_msgs::msg::UInt8MultiArray msg = *array;
+    bupt_interfaces::msg::Joy msg = *array;
     //TODO:解算 
     
     //发布消息

@@ -4,6 +4,12 @@
 #include<cmath>
 
 #define Sigma 5
+
+#define MAX_VELOCITY 5.0
+#define MIN_VELOCITY 0.05
+#define MAX_ANGULAR_VELOCITY 3.14
+#define MIN_ANGULAR_VELOCITY 0.2
+
 template<typename T>
 class filter{
 private:
@@ -31,3 +37,31 @@ public:
         return result/weight_sum;
     }
 };
+
+inline double vel_limiting(const double vel)
+{
+    if (abs(vel) >= MAX_VELOCITY)
+    {
+        return (vel > 0? MAX_VELOCITY : -MAX_VELOCITY);
+    }
+    else if(abs(vel) <= MIN_VELOCITY)
+    {
+        return 0;
+    }
+    //return (abs(vel) >= MAX_VELOCITY? (vel > 0? MAX_VELOCITY : -MAX_VELOCITY):(abs(vel) <= MIN_VELOCITY ? 0 : vel));
+    return vel;
+}
+
+inline double angular_vel_limiting(const double av)
+{
+    if (abs(av) >= MAX_ANGULAR_VELOCITY)
+    {
+        return (av > 0? MAX_ANGULAR_VELOCITY : -MAX_ANGULAR_VELOCITY);
+    }
+    else if(abs(av) <= MIN_ANGULAR_VELOCITY)
+    {
+        return 0;
+    }
+    //return (abs(av) >= MAX_VELOCITY? (av > 0? MAX_VELOCITY : -MAX_VELOCITY):(abs(av) <= MIN_VELOCITY ? 0 : av));  
+    return av;
+}

@@ -1,61 +1,87 @@
-from Uart import Serial
-from Socket import socket
-from crc8 import calculate_crc8
-from time import sleep
+import copy
+import queue
+import threading
+import time
 
-port = 'COM13'  
-baudrate = 115200
-try:
-    my_uart = Serial(port, baudrate)
-except:
-    print('cannot open serial port', port)
-    # exit()
+from py_pkg.handle_msg import handleMsg
+from py_pkg.Socket import TCPSocket
+from py_pkg.UART import SerialReader
 
-host = '192.168.4.1'
-port = 3456
-addr = (host, port)
-socket.setdefaulttimeout(500)
-my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, True)
-my_socket.ioctl(socket.SIO_KEEPALIVE_VALS, (1, 60 * 1000, 30 * 1000))
+global current_message
+current_message = handleMsg("Undefined")
+lock = threading.Lock()
+exit_signal =  threading.Event()
 
 
-try:
-    my_socket.connect(addr)
-except:
-    print('cannot connect socket', host, port)
-    exit()
+def update_message(new_message):
+    global current_message
+    with lock:
+        # 根据Stamp值和来源更新当前消息
+        if (new_message.stamp > current_message.stamp) or \
+                (new_message.stamp == current_message.stamp and new_message.source == "TCP"):
+            current_message = copy.deepcopy(new_message)
+            print("current_message id:",id(current_message))
+            #current_message.print()
 
-uart_valid = True
-socket_valid = True
-while True:
+
+def tcp_receiver(exit_signal):
+    tcp_socket = TCPSocket("192.168.4.1", 3456)
+    tcp_socket.connect()
+    q = tcp_socket.get_queue()
+    new_msg = handleMsg("TCP")
     try:
-        uart_data = my_uart.CRC8_Check(my_uart.recv(9))
-    except:
-        print('cannot recv uart data')
-        uart_vaild = False
-        continue
+        while not exit_signal.is_set():
+            if not q.empty():
+                byte_datas = q.get()
+                code = new_msg.calc(byte_datas, "TCP")
+                if code == -1:
+                    print("SOF or EOF Error")
+                elif code == -2:
+                    print("CRC32 Error")
+                else:
+                    update_message(new_msg)
+    finally:
+        print("Stopping")
+        tcp_socket.disconnect()
 
-    #TCP的毛病，client要先发送才能得到反馈
+
+def serial_receiver(exit_signal):
+    q = queue.Queue()
+    serial_reader = SerialReader('COM6', 115200, q)
+    serial_reader.start_reading()
+    new_msg_serial = handleMsg("Serial")
     try:
-        my_socket.send(bytes('1'.encode()))
-    except Exception as e:
-        print(f'Error sending socket data: {e}')
-        sleep(1)
-        continue
+        while not exit_signal.is_set():
+            if not q.empty():
+                byte_datas = q.get()
+                code = new_msg_serial.calc(byte_datas, "Serial")
+                if code == -1:
+                    print("SOF or EOF Error")
+                elif code == -2:
+                    print("CRC32 Error")
+                elif code == -3:
+                    pass
+                else:
+                    update_message(new_msg_serial)
+    finally:
+        print("停止读取串口数据")
+        serial_reader.stop_reading()
+
+
+if __name__ == "__main__":
+    # 创建线程
+    tcp_thread = threading.Thread(target=tcp_receiver, args=(exit_signal,))
+    # serial_thread = threading.Thread(target=serial_receiver, args=(exit_signal,))
+
+    # 启动线程
+    tcp_thread.start()
+    # serial_thread.start()
 
     try:
-        socket_bytes_data = my_socket.recv(9)
-        socket_data = [int(byte) for byte in socket_bytes_data[2:7]]
-    except Exception as e:
-        print(f'Error receiving socket data: {e}')
-        socket_valid = False
-        continue
-
-    if uart_data != socket_data:
-        print("uart_data != socket_data")
-        print('uart_data: ', uart_data, '\nsocket_data: ', socket_data)
-        continue
-
-    print('running',end='\n')
-    # sleep(0.1)
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        exit_signal.set()
+        tcp_thread.join()
+        # serial_thread.join()
+    print("Exited")
